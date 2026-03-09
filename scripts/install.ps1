@@ -10,7 +10,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$InstallDir = (Join-Path $env:LOCALAPPDATA 'Programs' 'modernize')
+    [string]$InstallDir = (Join-Path (Join-Path $env:LOCALAPPDATA 'Programs') 'modernize')
 )
 
 $ErrorActionPreference = 'Stop'
@@ -26,10 +26,24 @@ function Exit-Error  { param([string]$Msg) Write-Host "[error] $Msg" -Foreground
 
 # --- Detect architecture ---
 
-$arch = switch ([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture) {
-    'Arm64' { 'arm64' }
+$detectedArch = $null
+try {
+    $detectedArch = [System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString()
+} catch {
+}
+
+if (-not $detectedArch) {
+    $detectedArch = $env:PROCESSOR_ARCHITEW6432
+    if (-not $detectedArch) {
+        $detectedArch = $env:PROCESSOR_ARCHITECTURE
+    }
+}
+
+$arch = switch (($detectedArch -as [string]).ToUpperInvariant()) {
+    'ARM64' { 'arm64' }
     'X64'   { 'x64'   }
-    default { Exit-Error "Unsupported architecture: $([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture)" }
+    'AMD64' { 'x64'   }
+    default { Exit-Error "Unsupported architecture: $detectedArch" }
 }
 
 Write-Info "Detected platform: windows/$arch"

@@ -1,23 +1,23 @@
 class Modernize < Formula
   desc "AI-powered CLI for application modernization"
-  homepage "https://github.com/microsoft/modernize-cli"
-  version "0.0.226"
+  homepage "https://github.com/galiacheng/modernize-cli"
+  version "0.0.225"
 
   if OS.mac?
     if Hardware::CPU.intel?
-      url "https://github.com/microsoft/modernize-cli/releases/download/v0.0.226/modernize_0.0.226_darwin_x64.tar.gz"
-      sha256 "b18a7de04f36cb0236f122af0417110f9b2a7f7daa03ef6a130e8d837de7754e"
+      url "https://github.com/galiacheng/modernize-cli/releases/download/v0.0.225/modernize_0.0.225_darwin_x64.tar.gz"
+      sha256 "9f6895a879bd251ebefd790470d2d8c9b7777ee1557c83222ad2c5d639779935"
     elsif Hardware::CPU.arm?
-      url "https://github.com/microsoft/modernize-cli/releases/download/v0.0.226/modernize_0.0.226_darwin_arm64.tar.gz"
-      sha256 "786c7ae517a19c329702e977c0e871e3b503b31a87bc04f8024fabb18f6c7629"
+      url "https://github.com/galiacheng/modernize-cli/releases/download/v0.0.225/modernize_0.0.225_darwin_arm64.tar.gz"
+      sha256 "fca6dd93ccce3d91104f0ae19f1dafb49c2b800ce4baca46d38cbdc71d35c8b8"
     end
   elsif OS.linux?
     if Hardware::CPU.intel?
-      url "https://github.com/microsoft/modernize-cli/releases/download/v0.0.226/modernize_0.0.226_linux_x64.tar.gz"
-      sha256 "fdc582131e933f8fbe978da7601c9d2cdf40044305adc93c668ab501dee11f58"
+      url "https://github.com/galiacheng/modernize-cli/releases/download/v0.0.225/modernize_0.0.225_linux_x64.tar.gz"
+      sha256 "f6a270e65140276cbeb3437323ca187158de251ce49bc9b2eb519a9a6bec64da"
     elsif Hardware::CPU.arm?
-      url "https://github.com/microsoft/modernize-cli/releases/download/v0.0.226/modernize_0.0.226_linux_arm64.tar.gz"
-      sha256 "426b254c7808d8cdd482468b754815872993a85b4b9b2ed14871438700aa15fa"
+      url "https://github.com/galiacheng/modernize-cli/releases/download/v0.0.225/modernize_0.0.225_linux_arm64.tar.gz"
+      sha256 "d75ed588814b2271efc507ffb7ddef6a99588a2ccec972793c979ac56f1c52e7"
     end
   end
 
@@ -35,3 +35,4 @@ class Modernize < Formula
     assert_match "modernize", version_output
   end
 end
+

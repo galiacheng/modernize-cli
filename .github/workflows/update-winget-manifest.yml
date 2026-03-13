@@ -48,7 +48,7 @@ jobs:
 
           $releaseNotesUrl = "https://github.com/microsoft/modernize-cli/releases/tag/$tag"
 
-          ./wingetcreate.exe update Microsoft.ModernizeCLI `
+          ./wingetcreate.exe update GitHub.Copilot.modernization.agent `
             --version $version `
             --urls $urls `
             --release-notes-url $releaseNotesUrl `

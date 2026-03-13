@@ -1,0 +1,56 @@
+name: Update Winget Manifest
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g., v0.0.226)"
+        required: true
+
+jobs:
+  update-winget-manifest:
+    runs-on: windows-latest
+    steps:
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${{ github.event.release.tag_name }}"
+          fi
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Version: $VERSION (tag: $TAG)"
+
+      - name: Install wingetcreate
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+
+      - name: Update winget manifest and submit PR
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $tag = "${{ steps.version.outputs.tag }}"
+          $baseUrl = "https://github.com/microsoft/modernize-cli/releases/download/$tag"
+
+          $urls = @(
+            "$baseUrl/modernize_${version}_windows_x64.zip",
+            "$baseUrl/modernize_${version}_windows_arm64.zip"
+          )
+
+          $releaseNotesUrl = "https://github.com/microsoft/modernize-cli/releases/tag/$tag"
+
+          ./wingetcreate.exe update Microsoft.ModernizeCLI `
+            --version $version `
+            --urls $urls `
+            --release-notes-url $releaseNotesUrl `
+            --token $env:GH_TOKEN `
+            --submit

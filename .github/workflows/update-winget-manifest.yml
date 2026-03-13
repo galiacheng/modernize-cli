@@ -36,6 +36,33 @@ jobs:
         run: |
           Invoke-WebRequest -Uri https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
 
+      - name: Verify GH_TOKEN
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          if (-not $env:GH_TOKEN) {
+            Write-Error "GH_TOKEN secret is not set."
+            exit 1
+          }
+          # Verify token has access to public repos
+          $headers = @{ Authorization = "token $env:GH_TOKEN"; 'User-Agent' = 'winget-update' }
+          try {
+            $resp = Invoke-RestMethod -Uri "https://api.github.com/user" -Headers $headers
+            Write-Host "Authenticated as: $($resp.login)"
+          } catch {
+            Write-Error "Token validation failed: $_"
+            exit 1
+          }
+          # Check token can access winget-pkgs
+          try {
+            $resp = Invoke-RestMethod -Uri "https://api.github.com/repos/microsoft/winget-pkgs" -Headers $headers
+            Write-Host "Can access winget-pkgs: $($resp.full_name)"
+          } catch {
+            Write-Error "Cannot access microsoft/winget-pkgs with this token: $_"
+            exit 1
+          }
+
       - name: Update winget manifest and submit PR
         shell: pwsh
         env:

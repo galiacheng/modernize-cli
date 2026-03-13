@@ -60,18 +60,11 @@ For silent installation (no prompts):
 winget install GitHub.Copilot.modernization.agent --silent
 ```
 
-**Option 2 — PowerShell one-liner:**
-```powershell
-iex (irm https://raw.githubusercontent.com/microsoft/modernize-cli/main/scripts/install.ps1)
-```
-
-The scripts automatically download the latest release, install the modernize bundle to `~/.local/share/modernize` (Linux/macOS) or `%LOCALAPPDATA%\Programs\modernize` (Windows), place the `modernize` command in `~/.local/bin` (Linux/macOS), and add the command directory to your PATH.
-
-**Option 3 — MSI installer:**
+**Option 2 — MSI installer:**
 
 Download and run the latest MSI from the [Releases page](https://github.com/microsoft/modernize-cli/releases/latest).
 
-The installer places the `modernize` command in `%LOCALAPPDATA%\Programs\modernize` and adds it to your PATH automatically.
+Both options place the `modernize` command in `%LOCALAPPDATA%\Programs\modernize` and add it to your PATH automatically.
 
 > [!NOTE]
 > After installation, open a new terminal for the `modernize` command to be available on your PATH.

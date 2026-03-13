@@ -34,34 +34,7 @@ jobs:
       - name: Install wingetcreate
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
-
-      - name: Verify GH_TOKEN
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          if (-not $env:GH_TOKEN) {
-            Write-Error "GH_TOKEN secret is not set."
-            exit 1
-          }
-          # Verify token has access to public repos
-          $headers = @{ Authorization = "token $env:GH_TOKEN"; 'User-Agent' = 'winget-update' }
-          try {
-            $resp = Invoke-RestMethod -Uri "https://api.github.com/user" -Headers $headers
-            Write-Host "Authenticated as: $($resp.login)"
-          } catch {
-            Write-Error "Token validation failed: $_"
-            exit 1
-          }
-          # Check token can access winget-pkgs
-          try {
-            $resp = Invoke-RestMethod -Uri "https://api.github.com/repos/microsoft/winget-pkgs" -Headers $headers
-            Write-Host "Can access winget-pkgs: $($resp.full_name)"
-          } catch {
-            Write-Error "Cannot access microsoft/winget-pkgs with this token: $_"
-            exit 1
-          }
+          curl.exe -JLO https://aka.ms/wingetcreate/latest
 
       - name: Generate updated winget manifest
         shell: pwsh
@@ -71,16 +44,14 @@ jobs:
           $repo = "${{ inputs.target_repo || 'microsoft/modernize-cli' }}"
           $baseUrl = "https://github.com/$repo/releases/download/$tag"
 
-          $urls = @(
-            "$baseUrl/modernize_${version}_windows_x64.msi",
-            "$baseUrl/modernize_${version}_windows_arm64.msi"
-          )
+          $installerUrlx64 = "$baseUrl/modernize_${version}_windows_x64.msi"
+          $installerUrlarm64 = "$baseUrl/modernize_${version}_windows_arm64.msi"
 
           $releaseNotesUrl = "https://github.com/$repo/releases/tag/$tag"
 
-          ./wingetcreate.exe update GitHub.Copilot.modernization.agent `
+          .\wingetcreate.exe update GitHub.Copilot.modernization.agent `
             --version $version `
-            --urls $urls `
+            --urls "$installerUrlx64|x64" "$installerUrlarm64|arm64" `
             --release-notes-url $releaseNotesUrl `
             --out manifests
 
@@ -93,7 +64,14 @@ jobs:
       - name: Submit PR to winget-pkgs
         shell: pwsh
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          WINGETCREATE_GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          $manifestDir = (Get-ChildItem -Directory manifests | Select-Object -First 1).FullName
-          ./wingetcreate.exe submit --token $env:GH_TOKEN $manifestDir
+          $installerManifest = Get-ChildItem -Path manifests -Filter "*.installer.yaml" -Recurse | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $installerManifest) {
+            Write-Error "No installer manifest found in manifests directory."
+            exit 1
+          }
+          $manifestPath = Split-Path $installerManifest
+          echo "Submitting manifests from: $manifestPath"
+          Get-ChildItem $manifestPath
+          .\wingetcreate.exe submit $manifestPath

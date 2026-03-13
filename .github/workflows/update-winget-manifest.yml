@@ -63,10 +63,8 @@ jobs:
             exit 1
           }
 
-      - name: Update winget manifest and submit PR
+      - name: Generate updated winget manifest
         shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           $version = "${{ steps.version.outputs.version }}"
           $tag = "${{ steps.version.outputs.tag }}"
@@ -84,5 +82,18 @@ jobs:
             --version $version `
             --urls $urls `
             --release-notes-url $releaseNotesUrl `
-            --token $env:GH_TOKEN `
-            --submit
+            --output manifests
+
+          echo "Generated manifests:"
+          Get-ChildItem -Recurse manifests | ForEach-Object {
+            echo "--- $($_.FullName) ---"
+            Get-Content $_.FullName
+          }
+
+      - name: Submit PR to winget-pkgs
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          $manifestDir = (Get-ChildItem -Directory manifests | Select-Object -First 1).FullName
+          ./wingetcreate.exe submit --token $env:GH_TOKEN $manifestDir

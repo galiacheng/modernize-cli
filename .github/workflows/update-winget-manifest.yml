@@ -82,7 +82,7 @@ jobs:
             --version $version `
             --urls $urls `
             --release-notes-url $releaseNotesUrl `
-            --output manifests
+            --out manifests
 
           echo "Generated manifests:"
           Get-ChildItem -Recurse manifests | ForEach-Object {

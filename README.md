@@ -71,6 +71,9 @@ Download and run the latest MSI from the [Releases page](https://github.com/micr
 
 The installer places the `modernize` command in `%LOCALAPPDATA%\Programs\modernize` and adds it to your PATH automatically.
 
+> [!NOTE]
+> After installation, open a new terminal for the `modernize` command to be available on your PATH.
+
 ---
 
 The scripts automatically download the latest release, install the modernize bundle to `~/.local/share/modernize` (Linux/macOS) or `%LOCALAPPDATA%\Programs\modernize` (Windows), place the `modernize` command in `~/.local/bin` (Linux/macOS), and add the command directory to your PATH.

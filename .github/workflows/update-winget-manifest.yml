@@ -8,6 +8,10 @@ on:
       tag:
         description: "Release tag (e.g., v0.0.226)"
         required: true
+      target_repo:
+        description: "Target GitHub repo (owner/name)"
+        required: false
+        default: "microsoft/modernize-cli"
 
 jobs:
   update-winget-manifest:
@@ -39,14 +43,15 @@ jobs:
         run: |
           $version = "${{ steps.version.outputs.version }}"
           $tag = "${{ steps.version.outputs.tag }}"
-          $baseUrl = "https://github.com/microsoft/modernize-cli/releases/download/$tag"
+          $repo = "${{ inputs.target_repo || 'microsoft/modernize-cli' }}"
+          $baseUrl = "https://github.com/$repo/releases/download/$tag"
 
           $urls = @(
             "$baseUrl/modernize_${version}_windows_x64.zip",
             "$baseUrl/modernize_${version}_windows_arm64.zip"
           )
 
-          $releaseNotesUrl = "https://github.com/microsoft/modernize-cli/releases/tag/$tag"
+          $releaseNotesUrl = "https://github.com/$repo/releases/tag/$tag"
 
           ./wingetcreate.exe update GitHub.Copilot.modernization.agent `
             --version $version `

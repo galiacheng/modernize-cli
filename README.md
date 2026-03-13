@@ -40,6 +40,8 @@ brew install modernize
 curl -fsSL https://raw.githubusercontent.com/microsoft/modernize-cli/main/scripts/install.sh | sh
 ```
 
+The script automatically downloads the latest release, install the modernize bundle to `~/.local/share/modernize`, place the `modernize` command in `~/.local/bin`, and add the command directory to your PATH.
+
 After installation, reload your shell profile to apply the PATH update:
 ```bash
 source ~/.bashrc   # or source ~/.zshrc for Zsh
@@ -60,11 +62,16 @@ For silent installation (no prompts):
 winget install GitHub.Copilot.modernization.agent --silent
 ```
 
-**Option 2 — MSI installer:**
+**Option 2 — PowerShell one-liner:**
+```powershell
+iex (irm https://raw.githubusercontent.com/microsoft/modernize-cli/main/scripts/install.ps1)
+```
+
+**Option 3 — MSI installer:**
 
 Download and run the latest MSI from the [Releases page](https://github.com/microsoft/modernize-cli/releases/latest).
 
-Both options place the `modernize` command in `%LOCALAPPDATA%\Programs\modernize` and add it to your PATH automatically.
+All three options place the `modernize` command in `%LOCALAPPDATA%\Programs\modernize` and add it to your PATH automatically.
 
 > [!NOTE]
 > After installation, open a new terminal for the `modernize` command to be available on your PATH.

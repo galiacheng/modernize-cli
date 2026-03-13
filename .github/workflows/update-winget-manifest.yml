@@ -47,8 +47,8 @@ jobs:
           $baseUrl = "https://github.com/$repo/releases/download/$tag"
 
           $urls = @(
-            "$baseUrl/modernize_${version}_windows_x64.zip",
-            "$baseUrl/modernize_${version}_windows_arm64.zip"
+            "$baseUrl/modernize_${version}_windows_x64.msi",
+            "$baseUrl/modernize_${version}_windows_arm64.msi"
           )
 
           $releaseNotesUrl = "https://github.com/$repo/releases/tag/$tag"

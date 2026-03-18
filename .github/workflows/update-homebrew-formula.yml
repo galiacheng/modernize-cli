@@ -16,7 +16,6 @@ on:
 jobs:
   update-homebrew:
     name: Update Homebrew Formula
-    needs: publish-release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current repository
@@ -31,7 +30,7 @@ jobs:
 
       - name: Download release assets
         env:
-          GH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+          GH_TOKEN: ${{ secrets.WINGET_CREATE_GITHUB_TOKEN }}
         run: |
           version="${{ steps.version.outputs.version }}"
           tag="v$version"
@@ -47,7 +46,7 @@ jobs:
 
       - name: Checkout target repository
         env:
-          GH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+          GH_TOKEN: ${{ secrets.WINGET_CREATE_GITHUB_TOKEN }}
         run: |
           target_repo="${{ github.event.inputs.target_repo }}"
           gh repo clone "$target_repo" target-repo
@@ -63,7 +62,7 @@ jobs:
 
       - name: Create pull request
         env:
-          GH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+          GH_TOKEN: ${{ secrets.WINGET_CREATE_GITHUB_TOKEN }}
         run: |
           version="${{ steps.version.outputs.version }}"
           target_repo="${{ github.event.inputs.target_repo }}"

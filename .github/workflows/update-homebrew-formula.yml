@@ -1,0 +1,87 @@
+name: Update Homebrew Formula
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g., v0.0.226)"
+        required: true
+      target_repo:
+        description: "Target GitHub repo (owner/name)"
+        required: true
+        default: "microsoft/modernize-cli"
+
+jobs:
+  update-homebrew:
+    name: Update Homebrew Formula
+    needs: publish-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current repository
+        uses: actions/checkout@v6
+
+      - name: Normalize version
+        id: version
+        run: |
+          input_version="${{ github.event.inputs.version }}"
+          version="${input_version#v}"
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Download release assets
+        env:
+          GH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          tag="v$version"
+          target_repo="${{ github.event.inputs.target_repo }}"
+          mkdir -p assets
+
+          for suffix in darwin_x64.tar.gz darwin_arm64.tar.gz linux_x64.tar.gz linux_arm64.tar.gz; do
+            gh release download "$tag" \
+              --repo "$target_repo" \
+              --pattern "modernize_${version}_${suffix}" \
+              --dir assets/
+          done
+
+      - name: Checkout target repository
+        env:
+          GH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+        run: |
+          target_repo="${{ github.event.inputs.target_repo }}"
+          gh repo clone "$target_repo" target-repo
+
+      - name: Generate formula from template
+        shell: pwsh
+        run: |
+          .github/workflows/homebrew/Update-HomebrewFormula.ps1 `
+            -Version "${{ steps.version.outputs.version }}" `
+            -Repo "${{ github.event.inputs.target_repo }}" `
+            -AssetsPath "./assets" `
+            -OutputPath "./target-repo/Formula/modernize.rb"
+
+      - name: Create pull request
+        env:
+          GH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          target_repo="${{ github.event.inputs.target_repo }}"
+          branch="update-homebrew-v${version}"
+
+          gh auth setup-git
+
+          cd target-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add Formula/modernize.rb
+          git commit -m "Update Homebrew formula to v${version}"
+          git push origin "$branch"
+
+          gh pr create \
+            --repo "$target_repo" \
+            --base main \
+            --head "$branch" \
+            --title "Update Homebrew formula to v${version}" \
+            --body "Automated PR to update the Homebrew formula for modernize v${version}."
